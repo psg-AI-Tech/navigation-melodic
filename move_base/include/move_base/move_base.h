@@ -207,11 +207,12 @@ namespace move_base {
 
       ros::Time last_valid_plan_, last_valid_control_, last_oscillation_reset_;
       geometry_msgs::PoseStamped oscillation_pose_;
-      pluginlib::ClassLoader<nav_core::BaseGlobalPlanner> bgp_loader_;
-      pluginlib::ClassLoader<nav_core::BaseLocalPlanner> blp_loader_;
+      pluginlib::ClassLoader<nav_core::BaseGlobalPlanner> bgp_loader_; // 全局路径规划器加载器
+      pluginlib::ClassLoader<nav_core::BaseLocalPlanner> blp_loader_;   //局部路径规划器加载器
       pluginlib::ClassLoader<nav_core::RecoveryBehavior> recovery_loader_;
 
-      //set up plan triple buffer
+      //set up plan triple buffer 三级路径缓存
+      //  路径点 组成向量(用向量表示路径)
       std::vector<geometry_msgs::PoseStamped>* planner_plan_;
       std::vector<geometry_msgs::PoseStamped>* latest_plan_;
       std::vector<geometry_msgs::PoseStamped>* controller_plan_;

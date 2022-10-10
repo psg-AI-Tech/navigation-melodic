@@ -57,7 +57,8 @@ namespace move_base {
     recovery_loader_("nav_core", "nav_core::RecoveryBehavior"),
     planner_plan_(NULL), latest_plan_(NULL), controller_plan_(NULL),
     runPlanner_(false), setup_(false), p_freq_change_(false), c_freq_change_(false), new_global_plan_(false) {
-
+    
+    // action 接收目标点，进行规划；动作的命令起点
     as_ = new MoveBaseActionServer(ros::NodeHandle(), "move_base", boost::bind(&MoveBase::executeCb, this, _1), false);
 
     ros::NodeHandle private_nh("~");
@@ -654,11 +655,13 @@ namespace move_base {
       as_->setAborted(move_base_msgs::MoveBaseResult(), "Aborting on goal because it was sent with an invalid quaternion");
       return;
     }
-
+    //  move_base话题， move_base_msgs/MoveBaseGoal 给出目标点。
+    //  坐标变换，把目标点变换到世界坐标系下
     geometry_msgs::PoseStamped goal = goalToGlobalFrame(move_base_goal->target_pose);
 
     publishZeroVelocity();
     //we have a goal so start the planner
+    // 获得目标点后，进行规划；通过条件变量，给出信号到路径规划线程进行规划。 
     boost::unique_lock<boost::recursive_mutex> lock(planner_mutex_);
     planner_goal_ = goal;
     runPlanner_ = true;
@@ -694,6 +697,7 @@ namespace move_base {
       if(as_->isPreemptRequested()){
         if(as_->isNewGoalAvailable()){
           //if we're active and a new goal is available, we'll accept it, but we won't shut anything down
+          //如果有新的目标，会接受的，但不会关闭其他进程
           move_base_msgs::MoveBaseGoal new_goal = *as_->acceptNewGoal();
 
           if(!isQuaternionValid(new_goal.target_pose.pose.orientation)){
@@ -726,9 +730,11 @@ namespace move_base {
         }
         else {
           //if we've been preempted explicitly we need to shut things down
+          // 重置状态,设置为抢占式任务
           resetState();
 
           //notify the ActionServer that we've successfully preempted
+          // 通知ActionServer已成功抢占
           ROS_DEBUG_NAMED("move_base","Move base preempting the current goal");
           as_->setPreempted();
 
@@ -767,9 +773,12 @@ namespace move_base {
       ros::WallTime start = ros::WallTime::now();
 
       //the real work on pursuing a goal is done here
+      // 到达目标点的真正工作，控制机器人进行跟随
+      // 为什么是在这里，而不是其他线程
       bool done = executeCycle(goal, global_plan);
 
       //if we're done, then we'll return from execute
+      // 如果完成任务则返回
       if(done)
         return;
 

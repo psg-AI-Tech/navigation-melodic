@@ -87,6 +87,7 @@ void StaticLayer::onInitialize()
   {
     // we'll subscribe to the latched topic that the map server uses
     ROS_INFO("Requesting the map...");
+    // 订阅地图，并更新代价地图的静态层
     map_sub_ = g_nh.subscribe(map_topic, 1, &StaticLayer::incomingMap, this);
     map_received_ = false;
     has_updated_data_ = false;
@@ -331,6 +332,7 @@ void StaticLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int
       for (unsigned int j = min_j; j < max_j; ++j)
       {
         // Convert master_grid coordinates (i,j) into global_frame_(wx,wy) coordinates
+        // 也就是简单的xy轴加减法，没有利用ros的tf，这是和ros无关的代码(但是后面还是使用了tf2,这还是依赖ros)
         layered_costmap_->getCostmap()->mapToWorld(i, j, wx, wy);
         // Transform from global_frame_ to map_frame_
         tf2::Vector3 p(wx, wy, 0);

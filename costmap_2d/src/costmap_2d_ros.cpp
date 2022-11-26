@@ -112,12 +112,16 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   private_nh.param("track_unknown_space", track_unknown_space, false);
   private_nh.param("always_send_full_costmap", always_send_full_costmap, false);
 
+  //  rolling_window 关键参数，这应该是局部代价地图，根据周围障碍物信息更新地图
   layered_costmap_ = new LayeredCostmap(global_frame_, rolling_window, track_unknown_space);
 
+  // 根据参数 判断是否加载 插件(地图层次插件) ，比如static_map 静态层作为插件，也就是说不用静态层时，需要用plugins方式？
   if (!private_nh.hasParam("plugins"))
   {
+    // 根据配置更改了一些参数，更改的参数，是直接更改private_nh的参数，即可以使用private_nh.param 获取更改后的参数
     loadOldParameters(private_nh);
   } else {
+    // 没有plugins插件参数时提示 需要静态层？
     warnForOldParameters(private_nh);
   }
 
@@ -132,8 +136,9 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
       ROS_INFO("%s: Using plugin \"%s\"", name_.c_str(), pname.c_str());
 
       copyParentParameters(pname, type, private_nh);
-
+      //  根据配置参数plugins中的层，来加载costmap的层layer，如static_map、膨胀层等。
       boost::shared_ptr<Layer> plugin = plugin_loader_.createInstance(type);
+      //  向vector中添加插件
       layered_costmap_->addPlugin(plugin);
       plugin->initialize(layered_costmap_, name + "/" + pname, &tf_);
     }
@@ -216,7 +221,7 @@ void Costmap2DROS::loadOldParameters(ros::NodeHandle& nh)
     map["type"] = XmlRpc::XmlRpcValue("costmap_2d::StaticLayer");
     super_map.setStruct(&map);
     plugins.push_back(super_map);
-
+    //  移除参数
     ros::NodeHandle map_layer(nh, "static_layer");
     move_parameter(nh, map_layer, "map_topic");
     move_parameter(nh, map_layer, "unknown_cost_value");
@@ -433,6 +438,7 @@ void Costmap2DROS::movementCB(const ros::TimerEvent &event)
   }
 }
 
+// 更新地图线程，但是怎么触发的呢，必须要 动态配置服务器才创建线程吗
 void Costmap2DROS::mapUpdateLoop(double frequency)
 {
   // the user might not want to run the loop every cycle

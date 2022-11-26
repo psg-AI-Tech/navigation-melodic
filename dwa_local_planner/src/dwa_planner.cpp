@@ -235,7 +235,15 @@ namespace dwa_local_planner {
     return false;
   }
 
-
+/**
+ * @brief 
+ *      * 这里会将转换到局部地图坐标系中的路径保存到global_plan_中，这个其实就是把全局坐标系下的路径进行映射（到局部地图坐标系下）以及裁剪等操作后的路径。
+ *      这也就是局部规划器的全局路径
+ * @param global_pose 
+ * @param new_plan 
+ * @param footprint_spec 
+ * @return ** void 
+ */
   void DWAPlanner::updatePlanAndLocalCosts(
       const geometry_msgs::PoseStamped& global_pose,
       const std::vector<geometry_msgs::PoseStamped>& new_plan,
@@ -287,9 +295,16 @@ namespace dwa_local_planner {
   }
 
 
+  /**
+ * @brief 
+ * @param  global_pose 机器人当前位姿
+ * @param  global_vel 机器人当前速度(v，w)
+ * @param  drive_velocities 结果速度(v，w)
+ */
   /*
    * given the current state of the robot, find a good trajectory
    */
+  
   base_local_planner::Trajectory DWAPlanner::findBestPath(
       const geometry_msgs::PoseStamped& global_pose,
       const geometry_msgs::PoseStamped& global_vel,
@@ -300,11 +315,13 @@ namespace dwa_local_planner {
 
     Eigen::Vector3f pos(global_pose.pose.position.x, global_pose.pose.position.y, tf2::getYaw(global_pose.pose.orientation));
     Eigen::Vector3f vel(global_vel.pose.position.x, global_vel.pose.position.y, tf2::getYaw(global_vel.pose.orientation));
+    // 局部路径规划器的全局路径global_plan_； back（）最后一个元素，也就是局部路径规划器的目标点，加入代价函数参与打分
     geometry_msgs::PoseStamped goal_pose = global_plan_.back();
     Eigen::Vector3f goal(goal_pose.pose.position.x, goal_pose.pose.position.y, tf2::getYaw(goal_pose.pose.orientation));
     base_local_planner::LocalPlannerLimits limits = planner_util_->getCurrentLimits();
 
     // prepare cost functions and generators for this run
+    // 初始化轨迹产生器，即产生速度空间
     generator_.initialise(pos,
         vel,
         goal,

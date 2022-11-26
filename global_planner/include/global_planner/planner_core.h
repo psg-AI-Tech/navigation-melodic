@@ -184,6 +184,7 @@ class GlobalPlanner : public nav_core::BaseGlobalPlanner {
         ros::ServiceServer make_plan_srv_;
 
         PotentialCalculator* p_calc_;
+        // 全局路径规划器基类指针
         Expander* planner_;
         Traceback* path_maker_;
         OrientationFilter* orientation_filter_;

@@ -116,6 +116,7 @@ void GlobalPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap,
 
         bool use_dijkstra;
         private_nh.param("use_dijkstra", use_dijkstra, true);
+        // 根据参数 使用Dijkstra 或者A*; 继承同一个基类 Expander
         if (use_dijkstra)
         {
             DijkstraExpansion* de = new DijkstraExpansion(p_calc_, cx, cy);

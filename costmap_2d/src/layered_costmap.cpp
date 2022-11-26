@@ -103,6 +103,7 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
   {
     double new_origin_x = robot_x - costmap_.getSizeInMetersX() / 2;
     double new_origin_y = robot_y - costmap_.getSizeInMetersY() / 2;
+    // 当前机器人位置设置为原点（局部代价地图？）
     costmap_.updateOrigin(new_origin_x, new_origin_y);
   }
 
@@ -145,6 +146,7 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
     return;
 
   costmap_.resetMap(x0, y0, xn, yn);
+  // 利用每个层数据进行cost代价计算
   for (vector<boost::shared_ptr<Layer> >::iterator plugin = plugins_.begin(); plugin != plugins_.end();
        ++plugin)
   {

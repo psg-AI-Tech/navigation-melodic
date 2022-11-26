@@ -145,6 +145,7 @@ namespace dwa_local_planner {
       return false;
     }
     //when we get a new plan, we also want to clear any latch we may have on goal tolerances
+    // 辅助类，可以判断是否已经到达目标点， 这里reset，也就是设置没有到达目的地，进行规划
     latchedStopRotateController_.resetLatching();
 
     ROS_INFO("Got new plan");
@@ -191,7 +192,7 @@ namespace dwa_local_planner {
       ROS_ERROR("This planner has not been initialized, please call initialize() before using this planner");
       return false;
     }
-
+    // 机器人当前速度（v,w） 
     geometry_msgs::PoseStamped robot_vel;
     odom_helper_.getRobotVel(robot_vel);
 
@@ -206,6 +207,7 @@ namespace dwa_local_planner {
     drive_cmds.header.frame_id = costmap_ros_->getBaseFrameID();
     
     // call with updated footprint
+    // 当前机器人位姿 和速度(v，w)
     base_local_planner::Trajectory path = dp_->findBestPath(global_pose, robot_vel, drive_cmds);
     //ROS_ERROR("Best: %.2f, %.2f, %.2f, %.2f", path.xv_, path.yv_, path.thetav_, path.cost_);
 
@@ -260,13 +262,14 @@ namespace dwa_local_planner {
 
 
 
-
+// movebase 中调用，得到cmd_vel; 电泳 dwaComputeVelocityCommands()
   bool DWAPlannerROS::computeVelocityCommands(geometry_msgs::Twist& cmd_vel) {
     // dispatches to either dwa sampling control or stop and rotate control, depending on whether we have been close enough to goal
     if ( ! costmap_ros_->getRobotPose(current_pose_)) {
       ROS_ERROR("Could not get robot pose");
       return false;
     }
+    // 将全局路径映射到局部地图坐标系下（转换后的局部地图坐标系下的路径 transformed_plan）
     std::vector<geometry_msgs::PoseStamped> transformed_plan;
     if ( ! planner_util_.getLocalPlan(current_pose_, transformed_plan)) {
       ROS_ERROR("Could not get local plan");
@@ -281,6 +284,7 @@ namespace dwa_local_planner {
     ROS_DEBUG_NAMED("dwa_local_planner", "Received a transformed plan with %zu points.", transformed_plan.size());
 
     // update plan in dwa_planner even if we just stop and rotate, to allow checkTrajectory
+    // dwa路径规划器的该方法updatePlanAndLocalCosts，会将局部路径保存到dp_的global_plan_中
     dp_->updatePlanAndLocalCosts(current_pose_, transformed_plan, costmap_ros_->getRobotFootprint());
 
     if (latchedStopRotateController_.isPositionReached(&planner_util_, current_pose_)) {
@@ -299,6 +303,7 @@ namespace dwa_local_planner {
           current_pose_,
           boost::bind(&DWAPlanner::checkTrajectory, dp_, _1, _2, _3));
     } else {
+      // 
       bool isOk = dwaComputeVelocityCommands(current_pose_, cmd_vel);
       if (isOk) {
         publishGlobalPlan(transformed_plan);

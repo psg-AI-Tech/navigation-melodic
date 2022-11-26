@@ -164,7 +164,7 @@ private:
   double minx_, miny_, maxx_, maxy_;
   unsigned int bx0_, bxn_, by0_, byn_;
 
-  std::vector<boost::shared_ptr<Layer> > plugins_;
+  std::vector<boost::shared_ptr<Layer> > plugins_; // 存放添加的多个层次插件
 
   bool initialized_;
   bool size_locked_;

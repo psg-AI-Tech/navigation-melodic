@@ -118,10 +118,12 @@ namespace move_base {
     private_nh.param("recovery_behavior_enabled", recovery_behavior_enabled_, true);
 
     //create the ros wrapper for the planner's costmap... and initializer a pointer we'll use with the underlying map
+    // 全局代价地图
     planner_costmap_ros_ = new costmap_2d::Costmap2DROS("global_costmap", tf_);
     planner_costmap_ros_->pause();
 
     //initialize the global planner
+    // 全局路径规划器
     try {
       planner_ = bgp_loader_.createInstance(global_planner);
       planner_->initialize(bgp_loader_.getName(global_planner), planner_costmap_ros_);
@@ -131,6 +133,7 @@ namespace move_base {
     }
 
     //create the ros wrapper for the controller's costmap... and initializer a pointer we'll use with the underlying map
+    // 局部代价地图
     controller_costmap_ros_ = new costmap_2d::Costmap2DROS("local_costmap", tf_);
     controller_costmap_ros_->pause();
 
@@ -173,6 +176,7 @@ namespace move_base {
     recovery_index_ = 0;
 
     //we're all set up now so we can start the action server
+    //  启动action 服务
     as_->start();
 
     dsrv_ = new dynamic_reconfigure::Server<move_base::MoveBaseConfig>(ros::NodeHandle("~"));
@@ -271,6 +275,7 @@ namespace move_base {
     make_plan_add_unreachable_goal_ = config.make_plan_add_unreachable_goal;
 
     last_config_ = config;
+    
   }
 
   void MoveBase::goalCB(const geometry_msgs::PoseStamped::ConstPtr& goal){
@@ -541,6 +546,7 @@ namespace move_base {
   }
 
   geometry_msgs::PoseStamped MoveBase::goalToGlobalFrame(const geometry_msgs::PoseStamped& goal_pose_msg){
+    // 这个 lobal_frame_ 其实也就是自己配置的全局坐标系名字，比如map
     std::string global_frame = planner_costmap_ros_->getGlobalFrameID();
     geometry_msgs::PoseStamped goal_pose, global_pose;
     goal_pose = goal_pose_msg;
@@ -843,6 +849,7 @@ namespace move_base {
     }
 
     //if we have a new plan then grab it and give it to the controller
+    // 全局规划成功标记
     if(new_global_plan_){
       //make sure to set the new plan flag to false
       new_global_plan_ = false;

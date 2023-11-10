@@ -262,7 +262,7 @@ namespace dwa_local_planner {
 
 
 
-// movebase 中调用，得到cmd_vel; 电泳 dwaComputeVelocityCommands()
+// movebase 中调用，得到cmd_vel; 调用 dwaComputeVelocityCommands()
   bool DWAPlannerROS::computeVelocityCommands(geometry_msgs::Twist& cmd_vel) {
     // dispatches to either dwa sampling control or stop and rotate control, depending on whether we have been close enough to goal
     if ( ! costmap_ros_->getRobotPose(current_pose_)) {

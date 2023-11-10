@@ -35,6 +35,11 @@
  * Author: TKruse
  *********************************************************************/
 
+/**
+ * @brief 轨迹生成器基类/接口
+ * 
+ */
+
 #ifndef TRAJECTORY_SAMPLE_GENERATOR_H_
 #define TRAJECTORY_SAMPLE_GENERATOR_H_
 

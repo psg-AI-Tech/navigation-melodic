@@ -35,6 +35,11 @@
  * Author: TKruse
  *********************************************************************/
 
+/**
+ * @brief 代价函数基类/接口
+ * 
+ */
+
 #ifndef TRAJECTORYCOSTFUNCTION_H_
 #define TRAJECTORYCOSTFUNCTION_H_
 
@@ -49,6 +54,7 @@ namespace base_local_planner {
  * The prepare method is called before each batch run, and then for each
  * trajectory of the sampling set, score_trajectory may be called.
  */
+
 class TrajectoryCostFunction {
 public:
 

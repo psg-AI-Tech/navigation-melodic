@@ -71,6 +71,7 @@ bool ObstacleCostFunction::prepare() {
   return true;
 }
 
+// 每个代价函数打分计算
 double ObstacleCostFunction::scoreTrajectory(Trajectory &traj) {
   double cost = 0;
   double scale = getScalingFactor(traj, scaling_speed_, max_trans_vel_, max_scaling_factor_);

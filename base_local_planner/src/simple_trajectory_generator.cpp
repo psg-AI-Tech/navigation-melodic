@@ -118,6 +118,7 @@ void SimpleTrajectoryGenerator::initialise(
     VelocityIterator x_it(min_vel[0], max_vel[0], vsamples[0]);
     VelocityIterator y_it(min_vel[1], max_vel[1], vsamples[1]);
     VelocityIterator th_it(min_vel[2], max_vel[2], vsamples[2]);
+    //  三个维度按照各自步长采样，这里三个循环进行遍历组合x,y和theta; 三重循环还是比较耗时的
     for(; !x_it.isFinished(); x_it++) {
       vel_samp[0] = x_it.getVelocity();
       for(; !y_it.isFinished(); y_it++) {
@@ -158,6 +159,7 @@ bool SimpleTrajectoryGenerator::hasMoreTrajectories() {
 /**
  * Create and return the next sample trajectory
  */
+// 轨迹在 sample_params_向量中？
 bool SimpleTrajectoryGenerator::nextTrajectory(Trajectory &comp_traj) {
   bool result = false;
   if (hasMoreTrajectories()) {

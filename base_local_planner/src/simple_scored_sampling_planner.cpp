@@ -47,6 +47,14 @@ namespace base_local_planner {
     critics_ = critics;
   }
 
+/**
+ * @brief 
+ * 
+ * @param traj 
+ * @param best_traj_cost 传入的参数，是当前最好的得分，
+ *              对当前这条轨迹打分，然后和最好得分best_traj_cost比较(总共有7个代价函数和，如果前几项就已经高过目前这个最高得分了，自然后面就不用再计算了)
+ * @return ** double 
+ */
   double SimpleScoredSamplingPlanner::scoreTrajectory(Trajectory& traj, double best_traj_cost) {
     double traj_cost = 0;
     int gen_id = 0;
@@ -64,6 +72,7 @@ namespace base_local_planner {
       if (cost != 0) {
         cost *= score_function_p->getScale();
       }
+      // cost 分数就是 多个代价函数项的cost 累加
       traj_cost += cost;
       if (best_traj_cost > 0) {
         // since we keep adding positives, once we are worse than the best, we will stay worse
@@ -108,6 +117,9 @@ namespace base_local_planner {
           all_explored->push_back(loop_traj);
         }
 
+        // 这个得分应该是衡量代价的，也就是代价越小越好即得分越低越好？
+        // 所以，这里代价小于最优代价的时候更新best_cost?
+        // 但是scoreTrajectory 中得分是大于best_traj_cost后停止计算的。
         if (loop_traj_cost >= 0) {
           count_valid++;
           if (best_traj_cost < 0 || loop_traj_cost < best_traj_cost) {
@@ -120,6 +132,7 @@ namespace base_local_planner {
           break;
         }        
       }
+      // 得到/更新 最后的结果
       if (best_traj_cost >= 0) {
         traj.xv_ = best_traj.xv_;
         traj.yv_ = best_traj.yv_;

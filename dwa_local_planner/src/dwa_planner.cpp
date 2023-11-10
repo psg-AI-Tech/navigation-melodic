@@ -218,6 +218,7 @@ namespace dwa_local_planner {
     geometry_msgs::PoseStamped goal_pose = global_plan_.back();
     Eigen::Vector3f goal(goal_pose.pose.position.x, goal_pose.pose.position.y, tf2::getYaw(goal_pose.pose.orientation));
     base_local_planner::LocalPlannerLimits limits = planner_util_->getCurrentLimits();
+    // vsamples_ 应该就是配置的参数，采样步长？应该是采样数量
     generator_.initialise(pos,
         vel,
         goal,

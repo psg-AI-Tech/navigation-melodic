@@ -35,6 +35,11 @@
  * Author: TKruse
  *********************************************************************/
 
+/**
+ * @brief 打分器
+ * 
+ */
+
 #ifndef SIMPLE_SCORED_SAMPLING_PLANNER_H_
 #define SIMPLE_SCORED_SAMPLING_PLANNER_H_
 

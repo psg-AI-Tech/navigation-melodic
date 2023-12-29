@@ -148,6 +148,7 @@ namespace move_base {
     }
 
     // Start actively updating costmaps based on sensor data
+    // 里面也就是每个插件重新订阅话题(然后就能回调中处理/利用传感器数据)
     planner_costmap_ros_->start();
     controller_costmap_ros_->start();
 

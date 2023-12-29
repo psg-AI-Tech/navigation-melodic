@@ -112,16 +112,20 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   private_nh.param("track_unknown_space", track_unknown_space, false);
   private_nh.param("always_send_full_costmap", always_send_full_costmap, false);
 
-  //  rolling_window 关键参数，这应该是局部代价地图，根据周围障碍物信息更新地图
+  //  rolling_window 关键参数，这应该是局部代价地图?全局和局部地图都是这个类，也就是全局地图也可以滚动，
+  // 根据周围障碍物信息更新地图
+  //  LayeredCostmap 管理各个层，添加、操作层
   layered_costmap_ = new LayeredCostmap(global_frame_, rolling_window, track_unknown_space);
 
   // 根据参数 判断是否加载 插件(地图层次插件) ，比如static_map 静态层作为插件，也就是说不用静态层时，需要用plugins方式？
   if (!private_nh.hasParam("plugins"))
   {
+    // 没有添加plugins ，使用默认的plugins(设置这个plugins参数)
     // 根据配置更改了一些参数，更改的参数，是直接更改private_nh的参数，即可以使用private_nh.param 获取更改后的参数
     loadOldParameters(private_nh);
   } else {
-    // 没有plugins插件参数时提示 需要静态层？
+    // 设置plugins插件参数时提示 必须要静态层？
+    //  警告的目的是提醒用户不再使用 "static_map" 和 "map_type" 参数，而应该使用 "plugins" 参数。
     warnForOldParameters(private_nh);
   }
 
@@ -317,6 +321,8 @@ void Costmap2DROS::warnForOldParameters(ros::NodeHandle& nh)
   checkOldParam(nh, "map_type");
 }
 
+// 说明该参数是在 Hydro 版本之前的版本中使用的，并且现在已经被 "plugins" 参数替代。
+// 警告的目的是提醒用户不再使用 "static_map" 和 "map_type" 参数，而应该使用 "plugins" 参数。
 void Costmap2DROS::checkOldParam(ros::NodeHandle& nh, const std::string &param_name){
   if(nh.hasParam(param_name)){
     ROS_WARN("%s: Pre-Hydro parameter \"%s\" unused since \"plugins\" is provided", name_.c_str(), param_name.c_str());

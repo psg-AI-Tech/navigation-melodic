@@ -330,9 +330,11 @@ void ObstacleLayer::pointCloud2Callback(const sensor_msgs::PointCloud2ConstPtr& 
   buffer->unlock();
 }
 
+// 光纤追踪，以及计算代价
 void ObstacleLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x,
                                           double* min_y, double* max_x, double* max_y)
 {
+  // 
   if (rolling_window_)
     updateOrigin(robot_x - getSizeInMetersX() / 2, robot_y - getSizeInMetersY() / 2);
   if (!enabled_)
@@ -352,6 +354,8 @@ void ObstacleLayer::updateBounds(double robot_x, double robot_y, double robot_ya
   current_ = current;
 
   // raytrace freespace
+  // 将激光传感器射线经过的区域标记为空闲区域
+  // clearing_observations 为传感器数据？？多个传感器
   for (unsigned int i = 0; i < clearing_observations.size(); ++i)
   {
     raytraceFreespace(clearing_observations[i], min_x, min_y, max_x, max_y);
@@ -563,12 +567,16 @@ void ObstacleLayer::raytraceFreespace(const Observation& clearing_observation, d
     unsigned int x1, y1;
 
     // check for legality just in case
+    // 世界坐标转换为地图坐标，得到射线的终点坐标x1;
+    // 当然，前面就需要对对源wx 进行判断，对于每个点，通过计算射线与地图边界的交点，确保射线不越过地图的边界。
+    // 如果点在地图边界之外，就对射线进行截断，确保它不会越过地图的边缘
     if (!worldToMap(wx, wy, x1, y1))
       continue;
 
     unsigned int cell_raytrace_range = cellDistance(clearing_observation.raytrace_range_);
     MarkCell marker(costmap_, FREE_SPACE);
     // and finally... we can execute our trace to clear obstacles along that line
+    //  执行射线追踪，从传感器原点x0到射线重点x1进行追踪标记。
     raytraceLine(marker, x0, y0, x1, y1, cell_raytrace_range);
 
     updateRaytraceBounds(ox, oy, wx, wy, clearing_observation.raytrace_range_, min_x, min_y, max_x, max_y);

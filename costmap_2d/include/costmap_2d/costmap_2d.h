@@ -392,6 +392,7 @@ private:
   /**
    * @brief  A 2D implementation of Bresenham's raytracing algorithm... applies an action at each step
    */
+  // Bresenham直线绘制算法的一个实现
   template<class ActionType>
     inline void bresenham2D(ActionType at, unsigned int abs_da, unsigned int abs_db, int error_b, int offset_a,
                             int offset_b, unsigned int offset, unsigned int max_length)
